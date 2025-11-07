@@ -36,8 +36,10 @@
 #### `ScaleCompServer` - 缩放组件
 - 设置实体大小比例
 
-#### `HealthCompServer` - 生命值组件（已废弃，使用 AttrCompServer）
+#### `HealthCompServer` - 生命值组件（已废弃）
+- ⚠️ **已废弃**：请使用 `AttrCompServer` 代替
 - 获取/设置生命值
+- 迁移方法：使用 `AttrCompServer.GetAttrValue(AttrType.HEALTH)` 替代
 
 ### 玩家相关
 
