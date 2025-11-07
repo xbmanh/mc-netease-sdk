@@ -8,8 +8,13 @@ Minecraft 中国版 MOD 开发 SDK - 提供完整的 Python API，用于开发 M
 
 ## 📖 文档
 
-- **[完整 API 文档（中文）](API_DOCUMENTATION.md)** - 详细的中文 API 文档
-- **[Full API Documentation (English)](API_DOCUMENTATION_EN.md)** - Complete English API documentation
+### 主要文档
+- **[完整 API 文档（中文）](API_DOCUMENTATION.md)** - 详细的中文 API 文档，包含所有 API、示例和最佳实践
+- **[Full API Documentation (English)](API_DOCUMENTATION_EN.md)** - Complete English API documentation with examples
+
+### 快速参考
+- **[快速参考手册](QUICK_REFERENCE.md)** - 常用代码片段和快速查询
+- **[组件参考手册](COMPONENT_REFERENCE.md)** - 所有组件的完整列表和说明
 
 ## ✨ 特性
 
@@ -117,11 +122,13 @@ class MyClientSystem(clientApi.ClientSystem):
 - [Full API Documentation (English)](API_DOCUMENTATION_EN.md) - Complete API reference with examples
 
 文档包含：
-- 📘 API 参考 - 所有类和方法的详细说明
-- 💡 示例代码 - 实用的代码示例
-- 🎯 最佳实践 - 开发建议和技巧
-- ❓ 常见问题 - 常见问题解答
-- 🔄 版本对比 - 3.4 和 3.5 版本的差异
+- 📘 **API 参考** - 所有类和方法的详细说明
+- 💡 **示例代码** - 实用的代码示例和完整项目示例
+- 🎯 **最佳实践** - 开发建议、性能优化和调试技巧
+- ❓ **常见问题** - 常见问题解答和解决方案
+- 🔄 **版本对比** - 3.4 和 3.5 版本的差异说明
+- ⚡ **快速参考** - 常用代码片段和速查表
+- 🧩 **组件参考** - 所有组件的完整列表
 
 ## 🤝 贡献
 
