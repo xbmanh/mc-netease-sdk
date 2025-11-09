@@ -1,4 +1,223 @@
 # -*- coding: utf-8 -*-
+"""
+客户端API模块 (Client API Module)
+
+本模块是Minecraft网易版MOD开发的核心客户端API，提供了客户端系统和组件的注册、
+UI管理、渲染控制、输入处理等功能。客户端API主要负责玩家可见的界面和交互。
+
+=================================================================================================
+主要功能分类
+=================================================================================================
+
+1. 系统管理 (System Management)
+   - RegisterSystem: 注册客户端系统
+   - GetSystem: 获取已注册的系统实例
+   - GetClientSystemCls: 获取ClientSystem基类
+
+2. 组件管理 (Component Management)
+   - RegisterComponent: 注册自定义组件
+   - CreateComponent: 创建实体组件
+   - GetComponent: 获取实体组件
+   - DestroyComponent: 销毁实体组件
+   - GetEngineCompFactory: 获取引擎组件工厂
+
+3. UI系统 (UI System)
+   - RegisterUI: 注册UI界面
+   - CreateUI: 创建UI实例
+   - GetUI: 获取UI节点
+   - PushScreen: 推入UI到堆栈
+   - PopScreen/PopTopUI: 弹出UI
+   - GetTopScreen/GetTopUI: 获取栈顶UI
+
+4. UI可见性控制 (UI Visibility Control)
+   - HideHudGUI: 隐藏HUD界面
+   - HidePauseGUI: 隐藏暂停按钮
+   - HideChatGUI: 隐藏聊天按钮
+   - HideSlotBarGui: 隐藏物品栏
+   - HideJumpGui: 隐藏跳跃按钮
+   - HideHealthGui: 隐藏血量显示
+   - HideNameTag: 隐藏名称标签
+   ... 等20+个UI控制函数
+
+5. 原生UI操作 (Native UI Operations)
+   - OpenPauseGui: 打开暂停界面
+   - OpenChatGui: 打开聊天栏
+   - OpenInventoryGui: 打开背包界面
+   - OpenNeteaseStoreGui: 打开商店
+
+6. 导航系统 (Navigation System)
+   - GetNavPath: 获取寻路路径
+   - StartNavTo: 开始导航
+   - StopNav: 停止导航
+
+7. 坐标与方向 (Coordinates & Directions)
+   - GetLocalPosFromWorld: 世界坐标转局部坐标
+   - GetWorldPosFromLocal: 局部坐标转世界坐标
+   - GetDirFromRot: 旋转角度转朝向
+   - GetRotFromDir: 朝向转旋转角度
+   - GetIntPos: 获取方块坐标
+
+8. 输入与交互 (Input & Interaction)
+   - GetTouchPos: 获取触摸位置
+   - SimulateJump: 模拟跳跃
+   - ChangeSneakState: 切换潜行
+   - ClickInteractGUI: 模拟点击交互按钮
+   - GetWalkState: 获取行走状态
+
+9. 渲染控制 (Rendering Control)
+   - ReloadAllMaterials: 重载材质
+   - ReloadAllShaders: 重载Shader
+   - SetCrossHair: 设置准星
+   - HideCrossHairGUI: 隐藏准星
+
+10. 性能分析 (Profiling)
+    - StartProfile/StopProfile: 性能分析
+    - StartMemProfile/StopMemProfile: 内存分析
+    - StartMultiProfile/StopMultiProfile: 双端分析
+
+11. 协程支持 (Coroutine Support)
+    - StartCoroutine: 开启协程
+    - StopCoroutine: 停止协程
+
+12. 环境信息 (Environment Info)
+    - GetLocalPlayerId: 获取本地玩家ID
+    - GetHostPlayerId: 获取房主ID
+    - GetPlayerList: 获取所有玩家列表
+    - GetPlatform: 获取运行平台
+    - GetIP: 获取IP地址
+    - GetMinecraftVersion: 获取Minecraft版本
+
+13. 工具函数 (Utilities)
+    - GetMinecraftEnum: 获取枚举值
+    - GetLevelId: 获取关卡ID
+    - ImportModule: 导入模块
+    - GetModConfigJson: 获取MOD配置
+
+=================================================================================================
+快速开始示例
+=================================================================================================
+
+>>> # 1. 注册客户端系统
+>>> import mod.client.extraClientApi as clientApi
+>>> 
+>>> @clientApi.RegisterSystem("MyMod", "MyClientSystem", "path.to.MyClientSystem")
+>>> class MyClientSystem(clientApi.ClientSystem):
+...     def __init__(self, namespace, systemName):
+...         super(MyClientSystem, self).__init__(namespace, systemName)
+...         
+...         # 注册UI
+...         clientApi.RegisterUI("MyMod", "TestUI", "path.to.TestUIScreen", "test_ui.json")
+...         
+...         # 监听按键事件
+...         self.ListenForEvent("Minecraft", "Minecraft", "OnKeyPressInGame",
+...                           self, self.OnKeyPress)
+...     
+...     def OnKeyPress(self, args):
+...         key = args["key"]
+...         if key == "K":
+...             # 打开自定义UI
+...             ui = clientApi.CreateUI("MyMod", "TestUI")
+...     
+...     def Update(self):
+...         # 每帧执行
+...         pass
+...     
+...     def OnDestroy(self):
+...         pass
+
+>>> # 2. 创建和管理UI
+>>> # 注册UI
+>>> clientApi.RegisterUI("MyMod", "MainMenu", "mymod.ui.MainMenu", "main_menu.json")
+>>> 
+>>> # 创建UI
+>>> ui = clientApi.CreateUI("MyMod", "MainMenu", {"param": "value"})
+>>> 
+>>> # 使用堆栈管理UI
+>>> clientApi.PushScreen("MyMod", "SettingsUI")
+>>> clientApi.PopScreen()  # 关闭栈顶UI
+
+>>> # 3. 控制UI可见性
+>>> # 隐藏原生UI元素
+>>> clientApi.HideHudGUI(True)  # 隐藏HUD
+>>> clientApi.HideSlotBarGui(True)  # 隐藏物品栏
+>>> clientApi.HideJumpGui(True)  # 隐藏跳跃按钮
+
+>>> # 4. 使用组件
+>>> comp_factory = clientApi.GetEngineCompFactory()
+>>> 
+>>> # 创建位置组件
+>>> pos_comp = comp_factory.CreateComponent(entityId, "Minecraft", "pos")
+>>> pos = pos_comp.GetPos()
+>>> 
+>>> # 创建旋转组件
+>>> rot_comp = comp_factory.CreateComponent(entityId, "Minecraft", "rot")
+>>> rot = rot_comp.GetRot()
+
+>>> # 5. 导航系统
+>>> # 开始导航到目标点
+>>> target_pos = (100, 64, 100)
+>>> clientApi.StartNavTo(
+...     pos=target_pos,
+...     sfxPath="textures/navigation_arrow.png",
+...     callback=lambda: print("到达目标")
+... )
+
+=================================================================================================
+UI开发指南
+=================================================================================================
+
+1. UI创建流程
+   a. 准备UI定义文件（JSON格式）
+   b. 创建ScreenNode类继承自clientApi.GetScreenNodeCls()
+   c. 使用RegisterUI注册UI
+   d. 使用CreateUI或PushScreen创建UI实例
+
+2. UI生命周期
+   - OnCreate: UI创建时
+   - OnActive: UI激活时
+   - OnDeactive: UI失活时  
+   - OnDestroy: UI销毁时
+
+3. UI堆栈管理
+   - PushScreen: 将UI推入栈顶并显示
+   - PopScreen: 移除栈顶UI
+   - GetTopScreen: 获取栈顶UI实例
+
+=================================================================================================
+注意事项
+=================================================================================================
+
+1. 系统注册
+   - 必须在MOD加载时注册客户端系统
+   - 系统名称在命名空间内必须唯一
+   - 继承ClientSystem基类实现自定义系统
+
+2. UI管理
+   - UI必须先注册才能创建
+   - 建议使用PushScreen/PopScreen管理UI堆栈
+   - 注意UI的生命周期，及时清理资源
+
+3. 性能优化
+   - 避免在Update中执行复杂计算
+   - 使用协程处理耗时操作
+   - 合理控制UI刷新频率
+
+4. 客户端特性
+   - 客户端代码只在本地玩家运行
+   - 需要与服务端通过事件通讯
+   - 注意网络延迟对交互的影响
+
+=================================================================================================
+相关文档
+=================================================================================================
+
+- API文档: API_DOCUMENTATION.md
+- UI文档: 查看游戏官方UI开发指南
+- 组件参考: COMPONENT_REFERENCE.md
+- 服务端API: mod.server.extraServerApi
+
+=================================================================================================
+"""
 
 from typing import Generator
 from typing import Union
